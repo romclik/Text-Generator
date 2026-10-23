@@ -34,7 +34,7 @@ h2{font-size:.95rem;margin:0}
 @media (max-width:760px){.layout{grid-template-columns:1fr}}
 .panel{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;display:grid;gap:16px}
 .group{display:grid;gap:14px;border-top:1px solid var(--line);padding-top:14px}
-.group.off .opts{opacity:.4;pointer-events:none}
+.group.off .opts{display:none}
 label,.lbl{display:block;font-size:.875rem;font-weight:600;margin-bottom:6px}
 .hint{font-weight:400;color:var(--muted)}
 input[type=text],textarea,select{width:100%;font:inherit;color:var(--text);background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:8px 10px}
@@ -49,6 +49,11 @@ input[type=color]{width:44px;height:36px;padding:0;border:1px solid var(--line);
 .up{font-size:.875rem;color:var(--muted)}
 .up input{font:inherit;max-width:100%}
 button{font:inherit;font-weight:600;border:0;border-radius:8px;padding:11px 16px;background:var(--accent);color:var(--accent-text);cursor:pointer}
+details#symbols summary{cursor:pointer;font-size:.875rem;font-weight:600;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}
+details#symbols[open] summary{margin-bottom:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(42px,1fr));gap:6px}
+.grid button{padding:0;height:42px;font:400 26px/1 "DoorsRevamped",sans-serif;background:var(--bg);color:var(--text);border:1px solid var(--line)}
+.grid button:hover{border-color:var(--accent)}
 button.secondary{background:transparent;color:var(--text);border:1px solid var(--line)}
 .btns{display:flex;gap:10px;flex-wrap:wrap}
 .btns button{flex:1}
@@ -87,6 +92,11 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
         <label for="text">Text</label>
         <textarea id="text">HOTEL</textarea>
       </div>
+
+      <details id="symbols">
+        <summary>Symbols in this font <span class="hint">(tap one to add it)</span></summary>
+        <div class="grid" id="grid"></div>
+      </details>
 
       <div>
         <label for="size">Font size <span class="hint" id="sizeVal"></span></label>
@@ -240,6 +250,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
     $('flareVal').textContent = $('flare').value + '%';
     $('tiltVal').textContent = $('tilt').value + '%';
     $('stretchVal').textContent = $('stretch').value + '%';
+    $('symbols').hidden = $('font').value !== 'doors';
     $('g3d').classList.toggle('off', !$('on3d').checked);
     $('bg').disabled = $('transparent').checked;
     var tc = hex($('color').value), lum = (.299*tc[0] + .587*tc[1] + .114*tc[2]) / 255;
@@ -291,6 +302,20 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,select:focus-vis
     IDS.forEach(function(id){ var el = $(id); if (el.type === 'checkbox') el.checked = DEF[id]; else el.value = DEF[id]; });
     $('font').value = 'doors'; $('upWrap').hidden = true;
     render();
+  });
+
+  var SYMS = [[0x1F480,'Skull'],[0x1F6AA,'Door'],[0x1F6D7,'Elevator'],[0x1FA91,'Chair'],[0x1FA9C,'Ladder'],[0x1F512,'Lock'],[0x1F6D2,'Shopping cart'],[0x1FA99,'Coin'],[0x1F3C6,'Trophy'],
+    [0x1F441,'Eye'],[0x1F608,'Smiling devil'],[0x1F525,'Fire'],[0x1F4A7,'Droplet'],[0x1F343,'Leaves'],[0x1FAB7,'Lotus'],[0x1F319,'Crescent moon'],[0x1F30C,'Night sky'],[0x1F31F,'Glowing star'],[0x2B50,'Star'],
+    [0x2764,'Heart'],[0x2705,'Check mark'],[0x1F6AB,'Prohibited'],[0x1F6E1,'Shield'],[0x1F392,'Backpack'],[0x1F4AC,'Speech bubble'],[0x1F4BE,'Floppy disk'],[0x1F4C7,'Card index'],[0x1F4D2,'Notebook'],[0x1F4DB,'Name badge'],
+    [0x1F501,'Repeat'],[0x1F464,'Person'],[0x1F465,'People'],[0x1F446,'Point up'],[0x1F448,'Point left'],[0x1F449,'Point right'],[0x1F91A,'Raised hand']];
+  SYMS.forEach(function(s){
+    var ch = String.fromCodePoint(s[0]), b = document.createElement('button');
+    b.type = 'button'; b.textContent = ch; b.title = s[1]; b.setAttribute('aria-label', 'Add ' + s[1]);
+    b.addEventListener('click', function(){
+      var ta = $('text'), a = ta.selectionStart, e = ta.selectionEnd;
+      ta.setRangeText(ch, a, e, 'end'); ta.focus(); render();
+    });
+    $('grid').appendChild(b);
   });
 
   render(); loadDoors();
